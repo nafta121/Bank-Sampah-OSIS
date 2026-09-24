@@ -1,6 +1,7 @@
 export interface ClassProfile {
   classId: string;
   name: string;
+  username?: string;
   points: number;
   balance: number; // in IDR
   totalWeightKg: number;
@@ -52,8 +53,10 @@ export interface RewardItem {
 
 export interface RewardRedemption {
   redemptionId: string;
+  uniqueCode: string;
   classId: string;
   className?: string;
+  studentName?: string;
   rewardTitle: string;
   pointsSpent: number;
   cashSpent: number;

@@ -10,9 +10,15 @@ service cloud.firestore {
       return id is string && id.size() > 0 && id.size() <= 128;
     }
 
-    // Classes collection: public read for leaderboard and verification, write by authenticated clients or operators
+    // Health / Connection test document
+    match /test/{testId} {
+      allow read, write: if true;
+    }
+
+    // Classes collection: real-time live synced class profiles and points
     match /classes/{classId} {
-      allow read: if isValidId(classId);
+      allow get: if isValidId(classId);
+      allow list: if true;
       allow create, update: if isValidId(classId) 
         && request.resource.data.classId is string
         && request.resource.data.name is string
@@ -22,9 +28,10 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Transactions collection: readable by all to display public/class records, creatable with valid fields
+    // Transactions collection: real-time deposit stream and audit records
     match /transactions/{transactionId} {
-      allow read: if isValidId(transactionId);
+      allow get: if isValidId(transactionId);
+      allow list: if true;
       allow create: if isValidId(transactionId)
         && request.resource.data.transactionId is string
         && request.resource.data.classId is string
@@ -36,9 +43,10 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Redemptions collection
+    // Redemptions collection: points & cash reward redemption records
     match /redemptions/{redemptionId} {
-      allow read: if isValidId(redemptionId);
+      allow get: if isValidId(redemptionId);
+      allow list: if true;
       allow create: if isValidId(redemptionId)
         && request.resource.data.redemptionId is string
         && request.resource.data.classId is string
@@ -48,9 +56,10 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Notifications collection
+    // Notifications collection: alerts and balance-ready notifications
     match /notifications/{notificationId} {
-      allow read: if isValidId(notificationId);
+      allow get: if isValidId(notificationId);
+      allow list: if true;
       allow create: if isValidId(notificationId)
         && request.resource.data.notificationId is string
         && request.resource.data.classId is string

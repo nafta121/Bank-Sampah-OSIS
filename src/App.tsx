@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 import { Navbar, NavTab } from './components/Navbar.tsx';
 import { Dashboard } from './components/Dashboard.tsx';
+import { DepositHistoryView } from './components/DepositHistoryView.tsx';
 import { WasteEntryModal } from './components/WasteEntryModal.tsx';
 import { ClassPointsView } from './components/ClassPointsView.tsx';
 import { MonthlyReportView } from './components/MonthlyReportView.tsx';
 import { LoginModal } from './components/LoginModal.tsx';
+import { LoginPage } from './components/LoginPage.tsx';
 import { NotificationModal } from './components/NotificationModal.tsx';
 import { OfflineSyncBanner } from './components/OfflineSyncBanner.tsx';
 import {
@@ -33,7 +35,7 @@ import {
 import { Plus, Sparkles, Scale, Heart } from 'lucide-react';
 
 function BankSampahApp() {
-  const { currentUser } = useAuth();
+  const { currentUser, isAuthenticated } = useAuth();
 
   // Navigation tab
   const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
@@ -172,6 +174,14 @@ function BankSampahApp() {
 
   const unreadNotifsCount = notifications.filter((n) => !n.isRead).length;
 
+  // REQUIREMENT: Tampilkan halaman login terlebih dahulu sebelum masuk ke halaman utama aplikasi
+  if (!isAuthenticated || currentUser.role === 'guest') {
+    return <LoginPage classes={classes} isOnline={isOnline} />;
+  }
+
+  const isClassRep = currentUser.role === 'class_rep';
+  const isAdmin = currentUser.role === 'admin_osis';
+
   return (
     <div className="min-h-screen bg-slate-50/60 text-gray-900 font-sans flex flex-col selection:bg-emerald-500 selection:text-white">
       {/* Toast Notification */}
@@ -187,7 +197,9 @@ function BankSampahApp() {
         currentTab={currentTab}
         onSelectTab={(tab) => {
           if (tab === 'entry') {
-            setIsWasteModalOpen(true);
+            if (isAdmin) {
+              setIsWasteModalOpen(true);
+            }
           } else {
             setCurrentTab(tab);
           }
@@ -217,12 +229,26 @@ function BankSampahApp() {
             classes={classes}
             transactions={transactions}
             notifications={notifications}
-            onOpenWasteEntry={() => setIsWasteModalOpen(true)}
+            onOpenWasteEntry={() => {
+              if (isAdmin) setIsWasteModalOpen(true);
+            }}
             onOpenRedemptions={(classId) => {
-              setSelectedClassForReward(classId);
+              setSelectedClassForReward(classId || currentUser.classId);
               setCurrentTab('points');
             }}
             onOpenReports={() => setCurrentTab('reports')}
+          />
+        )}
+
+        {currentTab === 'history' && (
+          <DepositHistoryView
+            classes={classes}
+            transactions={transactions}
+            onOpenWasteEntry={isAdmin ? () => setIsWasteModalOpen(true) : undefined}
+            onOpenRedemptions={(classId) => {
+              setSelectedClassForReward(classId || currentUser.classId);
+              setCurrentTab('points');
+            }}
           />
         )}
 
@@ -231,12 +257,12 @@ function BankSampahApp() {
             classes={classes}
             redemptions={redemptions}
             transactions={transactions}
-            selectedClassId={selectedClassForReward}
+            selectedClassId={isClassRep ? currentUser.classId : selectedClassForReward}
             onClassUpdated={handleClassUpdated}
           />
         )}
 
-        {currentTab === 'reports' && (
+        {currentTab === 'reports' && isAdmin && (
           <MonthlyReportView classes={classes} transactions={transactions} />
         )}
       </main>
@@ -248,34 +274,38 @@ function BankSampahApp() {
             <span>Bank Sampah • Smart Eco School</span>
           </div>
           <div className="flex items-center gap-4 text-[11px] text-gray-400">
-            <span>Sinkronisasi Otomatis</span>
+            <span>Database Cloud Firestore Real-Time</span>
             <span>•</span>
-            <span>Didukung Analisis Lingkungan Gemini AI</span>
+            <span>Kode Unik Pengambilan Koperasi Siswa (Kopsis)</span>
           </div>
         </div>
       </footer>
 
-      {/* Floating Action Button (+ Setor Cepat) */}
-      <button
-        onClick={() => setIsWasteModalOpen(true)}
-        className="fixed bottom-6 right-6 z-30 p-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl shadow-xl shadow-emerald-600/30 flex items-center gap-2 font-bold text-sm transition transform hover:scale-105 active:scale-95 cursor-pointer"
-        title="Catat Setoran Sampah"
-      >
-        <Plus className="w-5 h-5" />
-        <span className="hidden sm:inline">Setor Sampah</span>
-      </button>
+      {/* Floating Action Button (+ Setor Cepat) — HANYA UNTUK ADMIN OSIS, KELAS TIDAK BISA INPUT */}
+      {isAdmin && (
+        <button
+          onClick={() => setIsWasteModalOpen(true)}
+          className="fixed bottom-6 right-6 z-30 p-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl shadow-xl shadow-emerald-600/30 flex items-center gap-2 font-bold text-sm transition transform hover:scale-105 active:scale-95 cursor-pointer"
+          title="Catat Setoran Sampah"
+        >
+          <Plus className="w-5 h-5" />
+          <span className="hidden sm:inline">Setor Sampah</span>
+        </button>
+      )}
 
       {/* Modals */}
-      <WasteEntryModal
-        isOpen={isWasteModalOpen}
-        onClose={() => {
-          setIsWasteModalOpen(false);
-          refreshQueue();
-        }}
-        classes={classes}
-        isOnline={isOnline}
-        onTransactionSaved={handleTransactionSaved}
-      />
+      {isAdmin && (
+        <WasteEntryModal
+          isOpen={isWasteModalOpen}
+          onClose={() => {
+            setIsWasteModalOpen(false);
+            refreshQueue();
+          }}
+          classes={classes}
+          isOnline={isOnline}
+          onTransactionSaved={handleTransactionSaved}
+        />
+      )}
 
       <LoginModal
         isOpen={isLoginModalOpen}

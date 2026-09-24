@@ -12,9 +12,12 @@ import {
   User,
   LogOut,
   Sparkles,
+  History,
+  Shield,
+  School,
 } from 'lucide-react';
 
-export type NavTab = 'dashboard' | 'entry' | 'points' | 'reports';
+export type NavTab = 'dashboard' | 'history' | 'entry' | 'points' | 'reports';
 
 interface NavbarProps {
   currentTab: NavTab;
@@ -36,29 +39,53 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenLoginModal,
 }) => {
   const { currentUser, logout, accessToken } = useAuth();
+  const isClassRep = currentUser.role === 'class_rep';
 
-  const navItems: { tab: NavTab; label: string; icon: React.ReactNode }[] = [
-    {
-      tab: 'dashboard',
-      label: 'Dasbor',
-      icon: <LayoutDashboard className="w-4 h-4" />,
-    },
-    {
-      tab: 'entry',
-      label: 'Setor Sampah',
-      icon: <Scale className="w-4 h-4" />,
-    },
-    {
-      tab: 'points',
-      label: 'Poin & Reward',
-      icon: <Award className="w-4 h-4" />,
-    },
-    {
-      tab: 'reports',
-      label: 'Laporan Bulanan',
-      icon: <FileSpreadsheet className="w-4 h-4" />,
-    },
-  ];
+  const navItems: { tab: NavTab; label: string; icon: React.ReactNode }[] = isClassRep
+    ? [
+        {
+          tab: 'dashboard',
+          label: 'Dasbor & Poin Kelas',
+          icon: <LayoutDashboard className="w-4 h-4" />,
+        },
+        {
+          tab: 'history',
+          label: 'Riwayat Setoran',
+          icon: <History className="w-4 h-4" />,
+        },
+        {
+          tab: 'points',
+          label: 'Tukar Poin Kopsis',
+          icon: <Award className="w-4 h-4" />,
+        },
+      ]
+    : [
+        {
+          tab: 'dashboard',
+          label: 'Dasbor Master',
+          icon: <LayoutDashboard className="w-4 h-4" />,
+        },
+        {
+          tab: 'entry',
+          label: '+ Setor Sampah',
+          icon: <Scale className="w-4 h-4" />,
+        },
+        {
+          tab: 'history',
+          label: 'Audit Log Riwayat',
+          icon: <History className="w-4 h-4" />,
+        },
+        {
+          tab: 'points',
+          label: 'Poin & Reward',
+          icon: <Award className="w-4 h-4" />,
+        },
+        {
+          tab: 'reports',
+          label: 'Laporan Bulanan',
+          icon: <FileSpreadsheet className="w-4 h-4" />,
+        },
+      ];
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-xs">
@@ -114,11 +141,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                   : 'bg-amber-50 text-amber-800 border border-amber-300 animate-pulse'
               }`}
+              title={isOnline ? 'Terhubung ke Database Cloud Firestore (Real-Time)' : 'Mode Offline'}
             >
               {isOnline ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="hidden sm:inline">Online</span>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="hidden sm:inline">Firestore Live</span>
                 </>
               ) : (
                 <>

@@ -2,5 +2,7 @@
   "name": "Bank Sampah OSIS - Smart Eco School",
   "description": "Aplikasi operasional Bank Sampah Sekolah oleh OSIS untuk pendataan sampah kelas, poin reward, dashboard real-time, mode offline & sinkronisasi otomatis, notifikasi reward, dan laporan bulanan terintegrasi Google Sheets.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

@@ -10,6 +10,7 @@
         "points": { "type": "number", "description": "Accumulated redeemable points" },
         "balance": { "type": "number", "description": "Accumulated cash balance in IDR" },
         "totalWeightKg": { "type": "number", "description": "Total weight of waste collected in kg" },
+        "username": { "type": "string", "description": "Standard login username for the class (e.g. x-mipa-1)" },
         "pin": { "type": "string", "description": "Access PIN code for class verification" },
         "representative": { "type": "string", "description": "Class waste coordinator or leader name" },
         "updatedAt": { "type": "string", "description": "ISO timestamp of last update" }
@@ -40,6 +41,8 @@
       "type": "object",
       "properties": {
         "redemptionId": { "type": "string", "description": "Unique redemption ID" },
+        "uniqueCode": { "type": "string", "description": "Unique pickup verification code for Kopsis claim (e.g. KOPS-XM1-892)" },
+        "studentName": { "type": "string", "description": "Name of student or coordinator picking up at kopsis" },
         "classId": { "type": "string", "description": "Class requesting redemption" },
         "rewardTitle": { "type": "string", "description": "Name of reward or cash disbursement" },
         "pointsSpent": { "type": "number", "description": "Points deducted" },

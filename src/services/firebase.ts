@@ -139,7 +139,7 @@ export async function testConnection() {
   }
 }
 
-// 5. Seed initial classes if database is empty
+// 5. Seed initial classes if database is empty or ensure standard PIN 123456 & username
 export async function seedInitialClasses() {
   try {
     const snap = await getDocs(collection(db, 'classes'));
@@ -147,6 +147,8 @@ export async function seedInitialClasses() {
       for (const cls of INITIAL_CLASSES) {
         await setDoc(doc(db, 'classes', cls.classId), {
           ...cls,
+          pin: '123456',
+          username: cls.username || cls.classId.toLowerCase(),
           updatedAt: new Date().toISOString(),
         });
       }
@@ -162,6 +164,24 @@ export async function seedInitialClasses() {
         createdAt: new Date().toISOString(),
       };
       await setDoc(doc(db, 'notifications', welcomeNotif.notificationId), welcomeNotif);
+    } else {
+      // Ensure all classes have the standard PIN 123456 and username
+      for (const docSnap of snap.docs) {
+        const data = docSnap.data();
+        if (data.pin !== '123456' || !data.username) {
+          const matchInitial = INITIAL_CLASSES.find((c) => c.classId === data.classId);
+          await setDoc(
+            doc(db, 'classes', docSnap.id),
+            {
+              ...data,
+              pin: '123456',
+              username: data.username || matchInitial?.username || data.classId.toLowerCase(),
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+        }
+      }
     }
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, 'classes');
@@ -316,20 +336,30 @@ export async function checkAndSendRewardNotification(cls: ClassProfile) {
 export async function redeemRewardInFirestore(
   cls: ClassProfile,
   reward: (typeof REWARD_ITEMS)[0],
-  useBalance: boolean
-) {
+  useBalance: boolean,
+  studentName?: string
+): Promise<{ updatedClass: ClassProfile; redemptionDoc: RewardRedemption }> {
   try {
-    const redemptionId = `redemption-${Date.now()}`;
-    const pointsToDeduct = useBalance ? 0 : reward.pointsCost;
+    const timestamp = Date.now();
+    // Generate unique claim code for Kopsis (e.g. KOPS-XM1-87A2)
+    const cleanClass = cls.classId.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
+    const randomHex = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const uniqueCode = `KOPS-${cleanClass}-${randomHex}`;
+    const redemptionId = `redemption-${timestamp}`;
+
+    // Point deduction & Reset point rule: "Setelah ditukarkan, point kelas akan tereset secara otomatis"
+    const pointsToDeduct = useBalance ? 0 : cls.points;
     const cashToDeduct = useBalance ? reward.cashCost : 0;
 
-    const newPoints = Math.max(0, cls.points - pointsToDeduct);
+    const newPoints = useBalance ? cls.points : 0; // Automatically resets to 0!
     const newBalance = Math.max(0, cls.balance - cashToDeduct);
 
     const redemptionDoc: RewardRedemption = {
       redemptionId,
+      uniqueCode,
       classId: cls.classId,
       className: cls.name,
+      studentName: studentName || cls.representative || 'Perwakilan Siswa',
       rewardTitle: reward.title,
       pointsSpent: pointsToDeduct,
       cashSpent: cashToDeduct,
@@ -347,21 +377,21 @@ export async function redeemRewardInFirestore(
     };
     await setDoc(doc(db, 'classes', cls.classId), updatedClass);
 
-    // Send redemption confirmation notification
+    // Send redemption confirmation notification with unique code for Kopsis
     const notifId = `notif-claimed-${Date.now()}`;
     const claimNotif: NotificationItem = {
       notificationId: notifId,
       classId: cls.classId,
       className: cls.name,
-      title: `🎁 Penukaran Berhasil: ${reward.title}`,
-      message: `Kelas ${cls.name} berhasil menukarkan "${reward.title}". Hubungi Seksi Kebersihan OSIS untuk serah terima fisik/dana!`,
+      title: `🎁 Penukaran Kopsis: ${reward.title}`,
+      message: `Kelas ${cls.name} berhasil menukarkan "${reward.title}". Kode Unik Kopsis: [ ${uniqueCode} ]. Tunjukkan kode ini saat mengambil barang di Koperasi Siswa.`,
       type: 'reward_ready',
       isRead: false,
       createdAt: new Date().toISOString(),
     };
     await setDoc(doc(db, 'notifications', notifId), claimNotif);
 
-    return updatedClass;
+    return { updatedClass, redemptionDoc };
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, 'redemptions');
     throw err;

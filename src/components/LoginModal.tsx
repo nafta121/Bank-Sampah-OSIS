@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.tsx';
 import { ClassProfile } from '../types/index.ts';
-import { Shield, KeyRound, School, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { Shield, KeyRound, School, X, CheckCircle, AlertCircle, LogOut } from 'lucide-react';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface LoginModalProps {
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, classes }) => {
-  const { loginAsClass, loginAsAdminPin, loginAsAdminGoogle, isLoading } = useAuth();
+  const { currentUser, loginAsClass, loginAsAdminPin, loginAsAdminGoogle, logout, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'class' | 'admin'>('class');
 
   // Class login form
@@ -267,6 +267,25 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, classes
                   Masuk Mode Pengurus OSIS
                 </button>
               </form>
+            </div>
+          )}
+
+          {currentUser.role !== 'guest' && (
+            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs">
+              <div className="truncate pr-2">
+                <span className="text-gray-400">Login aktif: </span>
+                <strong className="text-gray-800 font-semibold">{currentUser.displayName}</strong>
+              </div>
+              <button
+                onClick={() => {
+                  logout();
+                  onClose();
+                }}
+                className="px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg font-bold flex items-center gap-1 transition cursor-pointer shrink-0"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Keluar Akun</span>
+              </button>
             </div>
           )}
         </div>
