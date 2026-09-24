@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // Classes collection: public read for leaderboard and verification, write by authenticated clients or operators
+    match /classes/{classId} {
+      allow read: if isValidId(classId);
+      allow create, update: if isValidId(classId) 
+        && request.resource.data.classId is string
+        && request.resource.data.name is string
+        && request.resource.data.points is number
+        && request.resource.data.balance is number
+        && request.resource.data.totalWeightKg is number;
+      allow delete: if false;
+    }
+
+    // Transactions collection: readable by all to display public/class records, creatable with valid fields
+    match /transactions/{transactionId} {
+      allow read: if isValidId(transactionId);
+      allow create: if isValidId(transactionId)
+        && request.resource.data.transactionId is string
+        && request.resource.data.classId is string
+        && request.resource.data.category is string
+        && request.resource.data.weightKg is number
+        && request.resource.data.pointsEarned is number
+        && request.resource.data.cashEarned is number;
+      allow update: if isValidId(transactionId);
+      allow delete: if false;
+    }
+
+    // Redemptions collection
+    match /redemptions/{redemptionId} {
+      allow read: if isValidId(redemptionId);
+      allow create: if isValidId(redemptionId)
+        && request.resource.data.redemptionId is string
+        && request.resource.data.classId is string
+        && request.resource.data.rewardTitle is string
+        && request.resource.data.status is string;
+      allow update: if isValidId(redemptionId);
+      allow delete: if false;
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isValidId(notificationId);
+      allow create: if isValidId(notificationId)
+        && request.resource.data.notificationId is string
+        && request.resource.data.classId is string
+        && request.resource.data.title is string
+        && request.resource.data.message is string;
+      allow update: if isValidId(notificationId);
+      allow delete: if isValidId(notificationId);
+    }
+  }
+}
