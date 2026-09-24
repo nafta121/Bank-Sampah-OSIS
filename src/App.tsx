@@ -245,10 +245,10 @@ function BankSampahApp() {
       <footer className="border-t border-gray-200/80 bg-white py-6 mt-12 text-center text-xs text-gray-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 font-medium">
-            <span>Bank Sampah OSIS • Smart Eco School</span>
+            <span>Bank Sampah • Smart Eco School</span>
           </div>
           <div className="flex items-center gap-4 text-[11px] text-gray-400">
-            <span>Sinkronisasi Firestore & Google Sheets</span>
+            <span>Sinkronisasi Otomatis</span>
             <span>•</span>
             <span>Didukung Analisis Lingkungan Gemini AI</span>
           </div>
@@ -259,7 +259,7 @@ function BankSampahApp() {
       <button
         onClick={() => setIsWasteModalOpen(true)}
         className="fixed bottom-6 right-6 z-30 p-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl shadow-xl shadow-emerald-600/30 flex items-center gap-2 font-bold text-sm transition transform hover:scale-105 active:scale-95 cursor-pointer"
-        title="Catat Setoran Sampah Baru"
+        title="Catat Setoran Sampah"
       >
         <Plus className="w-5 h-5" />
         <span className="hidden sm:inline">Setor Sampah</span>
