@@ -83,14 +83,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="space-y-2 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-semibold text-emerald-100">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Program Adiwiyata & Bank Sampah OSIS</span>
+              <span>Bank Sampah OSIS</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
               Pilah Sampahmu, Kumpulkan Kas Kelasmu!
             </h1>
             <p className="text-sm text-emerald-100/90 leading-relaxed">
-              Pantau performa daur ulang setiap kelas secara real-time. Setiap gram sampah
-              terpilah mengurangi jejak karbon dan memberikan reward bernilai nyata untuk kelas.
+              Pantau performa setiap kelas secara real-time. Setiap gram sampah
+              terpilah mengurangi jejak karbon dan memberikan reward bernilai nyata.
             </p>
           </div>
 
@@ -115,7 +115,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="mt-6 pt-6 border-t border-white/15">
           <div className="flex justify-between items-center text-xs font-medium mb-2">
             <span>
-              Target Pengumpulan Bulan Ini:{' '}
+              Target Bulan Ini:{' '}
               <strong className="text-white">{totalKg.toFixed(1)} kg</strong> / {MONTHLY_TARGET_KG} kg
             </span>
             <span className="font-bold text-amber-300">{targetPercent}% Tercapai</span>
@@ -138,7 +138,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <div>
               <h4 className="text-sm font-bold text-amber-950">
-                Pemberitahuan Reward Siap Ditukarkan!
+                Reward Siap Ditukarkan!
               </h4>
               <p className="text-xs text-amber-800">
                 Ada <strong className="font-bold">{classesReadyForReward.length} kelas</strong>{' '}
@@ -188,7 +188,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             Rp {totalBalance.toLocaleString('id-ID')}
           </div>
           <p className="text-[11px] text-amber-600 font-medium">
-            Tersimpan aman untuk kas masing-masing kelas
+            Tersimpan aman untuk masing-masing kelas
           </p>
         </div>
 
